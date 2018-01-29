@@ -6,9 +6,8 @@ const client = new Discord.Client();
 firebase.initializeApp(keys.google_config);
 const db = firebase.database();
 
-//global
-let authorId;
-let gameInProgress;
+//global name space
+let users = {};
 
 //Connection Made
 client.on('ready', ()=> {
@@ -18,123 +17,99 @@ client.on('ready', ()=> {
 //Messages Listener
 client.on('message', message => {
 
-    if (message.content === '!start') {
+    let channel = message.channel;
+    let content = message.content;
+    let author = message.author;
+    let id = message.author.id;
 
-        if (gameInProgress) {
+    if (content === `!start`) {
 
-            message.channel.send(`Sorry, a game is already in progress.`);
+        if (!id in users || !users.id) {
+            users[id] = true;
+            channel.send(`***${author}*** , has started a game! use \`!win\` or \`!loss\` to record your score!`);
 
-        } else if (!gameInProgress) {
+        } else if (id in users) {
 
-            authorId = message.author.id;
-            gameInProgress = true;
-            message.channel.send(`${message.author} has started a game. Only they can record the score.`);
+            channel.send(`***${author}*** , you have already started a game. use \`!win\` or \`!loss\` to record your score before beginning a new game.`);
         };
 
     };
 
-    if (message.content === '!win') {
+    if (content === '!win' || content === '!loss') {
 
-        if (!authorId) {
+        if (!id in users || !users[id]) {
 
-            message.channel.send(`You must first start a game. Type !start to begin.`);
+            channel.send(`You must first start a game. Type \`!start\` to begin.`);
 
-        } else if (message.author.id === authorId) {
+        } else {
 
-            db.ref(`/users/${authorId}/`).once('value',(snapshot) => {
+            db.ref(`/users/${id}/`).once('value',(snapshot) => {
 
-                if(!snapshot.val()) {
+                if (!snapshot.val()) {
 
-                    db.ref(`/users/${authorId}/`).set({'games': 1, 'wins': 1, 'losses': 0}, onComplete => {
-                        message.channel.send(`Thank you ${message.author}, your win has been recorded.`);
-                        authorId = null;
-                        gameInProgress = false;
-                    });
+                    if (content === '!win') {
 
-                } else {
-                    updateGames = snapshot.val().games;
-                    updateWins = snapshot.val().wins;
-                    updateLosses = snapshot.val().losses;
-                    updateGames++;
-                    updateWins++;
+                        db.ref(`/users/${id}/`).set({'games': 1, 'wins': 1, 'losses': 0}, onComplete => {
+                            channel.send(`Thank you ${author}, your win has been recorded.`);
+                        });
 
-                    db.ref(`/users/${authorId}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-                        message.channel.send(`Thank you ${message.author}, your win has been recorded.`);
-                        authorId = null;
-                        gameInProgress = false;
-                    });
+                    } else if (content === '!loss') {
+
+                        db.ref(`/users/${id}/`).set({'games': 1, 'wins': 0, 'losses': 1}, onComplete => {
+                            channel.send(`Thank you ${author}, your loss has been recorded.`);
+                        });
+                    }
+
+                } else if (snapshot.val()) {
+
+                    let updateGames = snapshot.val().games;
+                    let updateWins = snapshot.val().wins;
+                    let updateLosses = snapshot.val().losses;
+
+                    if (content === '!win') {
+
+                        updateGames++;
+                        updateWins++
+                        db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
+                            channel.send(`Thank you ${author}, your win has been recorded.`);
+                        });
+
+                    } else if (content ==='!loss') {
+
+                        updateGames++;
+                        updateLosses++
+                        db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
+                            channel.send(`Thank you ${author}, your loss has been recorded.`);
+                        });
+                    };
                 };
-
             });
 
-        } else if (message.author.id !== authorId) {
-
-            message.channel.send(`Only the creator of the game can record the score`);
+            users[id] = false;
         };
     };
 
-    if (message.content === '!lose') {
+    if (content === '!record') {
 
-        if (!authorId) {
-
-            message.channel.send(`You must first start a game. Type !start to begin.`);
-
-        } else if (message.author.id === authorId) {
-
-            db.ref(`/users/${authorId}/`).once('value',(snapshot) => {
-
-                if(!snapshot.val()) {
-
-                    db.ref(`/users/${authorId}/`).set({'games': 1, 'wins': 0, 'losses': 1}, onComplete => {
-                        message.channel.send(`Thank you ${message.author}, your loss has been recorded.`);
-                        authorId = null;
-                        gameInProgress = false;
-                    });
-
-                } else {
-
-                    updateGames = snapshot.val().games;
-                    updateWins = snapshot.val().wins;
-                    updateLosses = snapshot.val().losses;
-                    updateGames++;
-                    updateLosses++;
-
-                    db.ref(`/users/${authorId}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-                        message.channel.send(`Thank you ${message.author}, your win has been recorded.`);
-                        authorId = null;
-                        gameInProgress = false;
-                    });
-                };
-            });
-
-        } else if (message.author.id !== authorId) {
-
-            message.channel.send(`Only the creator of the game can record the score`);
-        }
-    };
-
-    if (message.content === '!record') {
-
-        authorId = message.author.id;
-        db.ref(`/users/${authorId}/`).once('value',(snapshot) => {
+        db.ref(`/users/${id}/`).once('value',(snapshot) => {
 
             if(!snapshot.val()) {
 
-                message.channel.send(`${message.author}, you have no games on record. type !start to start a game, or !help for more options`);
+                channel.send(`${author}, you have no games on record. type !start to start a game, or !help for more options`);
 
             } else {
 
                 let percent = (snapshot.val().wins/snapshot.val().games)*100;
-                message.channel.send(
-                    `${message.author}, you have played **${snapshot.val().games} games**. You have **won ${snapshot.val().wins}** and **lost ${snapshot.val().losses}**.
+                channel.send(
+                    `${author}, you have played **${snapshot.val().games} games**. You have **won ${snapshot.val().wins}** and **lost ${snapshot.val().losses}**.
                     This gives you a win ratio of **${percent}%**`
                 );
             };
         });
     };
 
-    if (message.content === '!thanks') {
-        message.channel.send(`${message.author}, you are very welcome `);
+    if (content === '!thanks') {
+        channel.send(`${author}, you are very welcome `);
     };
 });
 
@@ -159,7 +134,7 @@ client.on('presenceUpdate', (oldMember, newMember) => {
 
         if (newMember.presence.game && newMember.presence.game.url) {
 
-            channel.send(`**${newMember.user.tag}** just started streaming. See them live at **${newMember.presence.game.url}**!`);
+            channel.send(`**${newMember.user}** just started streaming. See them live at **${newMember.presence.game.url}**!`);
 
         } else if (newMember.presence.game) {
 
