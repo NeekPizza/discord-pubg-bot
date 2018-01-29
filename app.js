@@ -150,6 +150,24 @@ client.setInterval ( function(){
 
 }, 86400000);
 
+//Detect if user is streaming, announce game they are playing
+client.on('presenceUpdate', (oldMember, newMember) => {
+
+    if (oldMember.presence.game !== newMember.presence.game) {
+
+        if (newMember.presence.game && newMember.presence.game.url) {
+
+            let channel = client.channels.find('name', 'general');
+            channel.send(`**${newMember.user.tag}** just started streaming. See them live at **${newMember.presence.game.url}**!`);
+
+        } else if (newMember.presence.game) {
+
+            let channel = client.channels.find('name', 'general');
+            channel.send(`**@${newMember.user.username}** just started playing **${newMember.presence.game.name}** !`);
+        }
+    }
+});
+
 //auto-reconnect
 client.on('disconnect', (err, code) => {
     console.log(`Bot disconnected with code ${code}, for reason ${err}`);
