@@ -61,7 +61,7 @@ client.on('message', message => {
                             db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
                                 channel.send(`Thank you ${author}, your win has been recorded.`);
                             });
-                        } else if (content ===LOSS) {
+                        } else if (content === LOSS) {
                             updateGames++;
                             updateLosses++
                             db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
