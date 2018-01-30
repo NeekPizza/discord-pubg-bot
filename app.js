@@ -1,3 +1,7 @@
+const Content = require('./lib/Content.js');
+const Start = require('./lib/Start.js');
+const users = require('./lib/User.js');
+
 const firebase = require('firebase');
 const Discord = require('discord.js');
 const keys = require('./keys');
@@ -7,7 +11,7 @@ firebase.initializeApp(keys.google_config);
 const db = firebase.database();
 
 //global name space
-let users = {};
+// let users = {};
 
 //Connection Made
 client.on('ready', ()=> {
@@ -16,6 +20,7 @@ client.on('ready', ()=> {
 
 //Messages Listener
 client.on('message', message => {
+    Content.setContent(message);
 
     let channel = message.channel;
     let content = message.content;
@@ -23,7 +28,7 @@ client.on('message', message => {
     let id = message.author.id;
 
     if (content === `!start`) {
-
+        Start.run();
         if (!id in users || !users.id) {
             users[id] = true;
             channel.send(`***${author}*** , has started a game! use \`!win\` or \`!loss\` to record your score!`);
