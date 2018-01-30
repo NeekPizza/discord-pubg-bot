@@ -1,4 +1,4 @@
-const Content = require('./lib/Content.js');
+const Content = require('./lib/BaseContentController.js');
 const Start = require('./lib/Start.js');
 const users = require('./lib/User.js');
 
@@ -91,87 +91,6 @@ client.on('message', message => {
             channel.send(`${author}, you are very welcome `);
             break;
     }
-
-    // if (content === `!start`) {
-    //     Start.run();
-    // };
-
-    // if (content === '!win' || content === '!loss') {
-
-    //     if (!id in users || !users[id]) {
-
-    //         channel.send(`You must first start a game. Type \`!start\` to begin.`);
-
-    //     } else {
-
-    //         db.ref(`/users/${id}/`).once('value',(snapshot) => {
-
-    //             if (!snapshot.val()) {
-
-    //                 if (content === '!win') {
-
-    //                     db.ref(`/users/${id}/`).set({'games': 1, 'wins': 1, 'losses': 0}, onComplete => {
-    //                         channel.send(`Thank you ${author}, your win has been recorded.`);
-    //                     });
-
-    //                 } else if (content === '!loss') {
-
-    //                     db.ref(`/users/${id}/`).set({'games': 1, 'wins': 0, 'losses': 1}, onComplete => {
-    //                         channel.send(`Thank you ${author}, your loss has been recorded.`);
-    //                     });
-    //                 }
-
-    //             } else if (snapshot.val()) {
-
-    //                 let updateGames = snapshot.val().games;
-    //                 let updateWins = snapshot.val().wins;
-    //                 let updateLosses = snapshot.val().losses;
-
-    //                 if (content === '!win') {
-
-    //                     updateGames++;
-    //                     updateWins++
-    //                     db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-    //                         channel.send(`Thank you ${author}, your win has been recorded.`);
-    //                     });
-
-    //                 } else if (content ==='!loss') {
-
-    //                     updateGames++;
-    //                     updateLosses++
-    //                     db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-    //                         channel.send(`Thank you ${author}, your loss has been recorded.`);
-    //                     });
-    //                 };
-    //             };
-    //         });
-
-    //         users[id] = false;
-    //     };
-    // };
-
-    // if (content === '!record') {
-
-    //     db.ref(`/users/${id}/`).once('value',(snapshot) => {
-
-    //         if(!snapshot.val()) {
-
-    //             channel.send(`${author}, you have no games on record. type !start to start a game, or !help for more options`);
-
-    //         } else {
-
-    //             let percent = (snapshot.val().wins/snapshot.val().games)*100;
-    //             channel.send(
-    //                 `${author}, you have played **${snapshot.val().games} games**. You have **won ${snapshot.val().wins}** and **lost ${snapshot.val().losses}**.
-    //                 This gives you a win ratio of **${percent}%**`
-    //             );
-    //         };
-    //     });
-    // };
-
-    // if (content === '!thanks') {
-    //     channel.send(`${author}, you are very welcome `);
-    // };
 });
 
 //auto-purge comments from general
