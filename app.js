@@ -29,14 +29,14 @@ client.on('message', message => {
 
     if (content === `!start`) {
         Start.run();
-        if (!id in users || !users.id) {
-            users[id] = true;
-            channel.send(`***${author}*** , has started a game! use \`!win\` or \`!loss\` to record your score!`);
+        // if (!id in users || !users.id) {
+        //     users[id] = true;
+        //     channel.send(`***${author}*** , has started a game! use \`!win\` or \`!loss\` to record your score!`);
 
-        } else if (id in users) {
+        // } else if (id in users) {
 
-            channel.send(`***${author}*** , you have already started a game. use \`!win\` or \`!loss\` to record your score before beginning a new game.`);
-        };
+        //     channel.send(`***${author}*** , you have already started a game. use \`!win\` or \`!loss\` to record your score before beginning a new game.`);
+        // };
 
     };
 
