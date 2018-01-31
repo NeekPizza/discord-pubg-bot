@@ -27,11 +27,10 @@ client.on('ready', ()=> {
 //Messages Listener
 client.on('message', message => {
     // Invoke router and store to variable
-    const router = Router(message);
-    let channel = message.channel;
-    let content = message.content;
-    let author = message.author;
-    let id = message.author.id;
+    // let channel = message.channel;
+    // let content = message.content;
+    // let author = message.author;
+    // let id = message.author.id;
 
     /* This is all you need in life. */
     Copterizer.run(message);
