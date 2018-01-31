@@ -1,6 +1,5 @@
-const Content = require('./lib/BaseContentController.js');
-const Start = require('./lib/Start.js');
 const users = require('./lib/User.js');
+const Copterizer = require('./copterizer/Router.js');
 
 const firebase = require('firebase');
 const Discord = require('discord.js');
@@ -8,6 +7,7 @@ const keys = require('./keys');
 const client = new Discord.Client();
 
 firebase.initializeApp(keys.google_config);
+Copterizer.init();
 const db = firebase.database();
 
 // Enums
@@ -17,80 +17,86 @@ const LOSS = '!loss';
 const RECORD = '!record';
 const THANKS = '!thanks';
 
-//Connection Made
+// const message = {content: '!example', channel: {}, author: {name: 'asdf', id: '1234'}};
+// Copterizer.run(message);
+Connection Made
 client.on('ready', ()=> {
     console.log('I am Ready!');
 });
 
 //Messages Listener
 client.on('message', message => {
-    Content.setContent(message);
-
+    // Invoke router and store to variable
+    const router = Router(message);
     let channel = message.channel;
     let content = message.content;
     let author = message.author;
     let id = message.author.id;
 
-    switch(content) {
-        case START:
-            Start.run();
-            break;
-        case WIN:
-        case LOSS:
-            if (!id in users || !users[id]) {
-                channel.send(`You must first start a game. Type \`!start\` to begin.`);
-            } else {
-                db.ref(`/users/${id}/`).once('value',(snapshot) => {
-                    if (!snapshot.val()) {
-                        if (content === WIN) {
-                            db.ref(`/users/${id}/`).set({'games': 1, 'wins': 1, 'losses': 0}, onComplete => {
-                                channel.send(`Thank you ${author}, your win has been recorded.`);
-                            });
-                        } else if (content === LOSS) {
-                            db.ref(`/users/${id}/`).set({'games': 1, 'wins': 0, 'losses': 1}, onComplete => {
-                                channel.send(`Thank you ${author}, your loss has been recorded.`);
-                            });
-                        }
-                    } else if (snapshot.val()) {
-                        let updateGames = snapshot.val().games;
-                        let updateWins = snapshot.val().wins;
-                        let updateLosses = snapshot.val().losses;
-                        if (content === WIN) {
-                            updateGames++;
-                            updateWins++
-                            db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-                                channel.send(`Thank you ${author}, your win has been recorded.`);
-                            });
-                        } else if (content === LOSS) {
-                            updateGames++;
-                            updateLosses++
-                            db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
-                                channel.send(`Thank you ${author}, your loss has been recorded.`);
-                            });
-                        };
-                    };
-                });
+    /* This is all you need in life. */
+    Copterizer.run(message);
+    /*        .....This.....         */
 
-                users[id] = false;
-            }
-            break;
-        case RECORD:
-            db.ref(`/users/${id}/`).once('value',(snapshot) => {
-                if(!snapshot.val()) {
-                    channel.send(`${author}, you have no games on record. type !start to start a game, or !help for more options`);
-                } else {
-                    let percent = (snapshot.val().wins/snapshot.val().games)*100;
-                    channel.send(
-                        `${author}, you have played **${snapshot.val().games} games**. You have **won ${snapshot.val().wins}** and **lost ${snapshot.val().losses}**.
-                        This gives you a win ratio of **${percent}%**`
-                    );
-                };
-            });
-            break;
-        case THANKS:
-            channel.send(`${author}, you are very welcome `);
-            break;
-    }
+    // switch(content) {
+    //     case START:
+    //         // router.run(router.START_CONTROLLER);
+    //         // break;
+    //     case WIN:
+    //     case LOSS:
+    //         if (!id in users || !users[id]) {
+    //             channel.send(`You must first start a game. Type \`!start\` to begin.`);
+    //         } else {
+    //             db.ref(`/users/${id}/`).once('value',(snapshot) => {
+    //                 if (!snapshot.val()) {
+    //                     if (content === WIN) {
+    //                         db.ref(`/users/${id}/`).set({'games': 1, 'wins': 1, 'losses': 0}, onComplete => {
+    //                             channel.send(`Thank you ${author}, your win has been recorded.`);
+    //                         });
+    //                     } else if (content === LOSS) {
+    //                         db.ref(`/users/${id}/`).set({'games': 1, 'wins': 0, 'losses': 1}, onComplete => {
+    //                             channel.send(`Thank you ${author}, your loss has been recorded.`);
+    //                         });
+    //                     }
+    //                 } else if (snapshot.val()) {
+    //                     let updateGames = snapshot.val().games;
+    //                     let updateWins = snapshot.val().wins;
+    //                     let updateLosses = snapshot.val().losses;
+    //                     if (content === WIN) {
+    //                         updateGames++;
+    //                         updateWins++
+    //                         db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
+    //                             channel.send(`Thank you ${author}, your win has been recorded.`);
+    //                         });
+    //                     } else if (content === LOSS) {
+    //                         updateGames++;
+    //                         updateLosses++
+    //                         db.ref(`/users/${id}/`).set({'games': updateGames, 'wins': updateWins, 'losses': updateLosses }, onComplete => {
+    //                             channel.send(`Thank you ${author}, your loss has been recorded.`);
+    //                         });
+    //                     };
+    //                 };
+    //             });
+
+    //             users[id] = false;
+    //         }
+    //         break;
+    //     case RECORD:
+    //         db.ref(`/users/${id}/`).once('value',(snapshot) => {
+    //             if(!snapshot.val()) {
+    //                 channel.send(`${author}, you have no games on record. type !start to start a game, or !help for more options`);
+    //             } else {
+    //                 let percent = (snapshot.val().wins/snapshot.val().games)*100;
+    //                 channel.send(
+    //                     `${author}, you have played **${snapshot.val().games} games**. You have **won ${snapshot.val().wins}** and **lost ${snapshot.val().losses}**.
+    //                     This gives you a win ratio of **${percent}%**`
+    //                 );
+    //             };
+    //         });
+    //         break;
+    //     case THANKS:
+    //         channel.send(`${author}, you are very welcome `);
+    //         break;
+    // }
 });
 
 //auto-purge comments from general
