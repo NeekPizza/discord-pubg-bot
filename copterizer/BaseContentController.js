@@ -97,6 +97,13 @@ class BaseContentController {
     return this;
   }
 
+  messageChannel(message) {
+    if (!this.channel || !this.channel.send) {
+      return;
+    }
+    this.channel.send(message);
+  }
+
   /**
    * Throws a message to the channel
    * @param  {string} message
