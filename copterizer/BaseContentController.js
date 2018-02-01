@@ -43,11 +43,12 @@ class BaseContentController {
 
   // Reasons
   /**
-     to run succcess actions
+   * Condition to run succcess actions
+   * Defaults to true
    * @return {boolean}
    */
   getSuccessCondition() {
-    throwOverrideError('getSuccessCondition');
+    return true;
   }
 
   // Actions
@@ -65,6 +66,14 @@ class BaseContentController {
    */
   getSuccessMessage() {}
   getFailureMessage() {}
+
+  /**
+   * When the registerMessage hits for this controller
+   * Happens before the other actions more vague
+   * Runs regardless of successCondition
+   * @return {void}
+   */
+  onMessageMatch() {}
 
   /**
    * Runs the queries based on the successCondition

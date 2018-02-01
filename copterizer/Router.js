@@ -59,7 +59,7 @@ function init() {
  * @param  {Any Additional Args}  props
  * @return {void}
  */
-function run(message, ...props) {
+function processMessage(message, ...props) {
   if (!hasBeenInit) { throw('Oops, you forgot to run copterizer.init')}
   // Check if the map has the content
   if (
@@ -68,14 +68,15 @@ function run(message, ...props) {
   ) {
     return;
   }
-
   const _controller = controllerMap[message.content];
   const controllerInstance = new _controller(message, true);
+  controllerInstance.onMessageMatch(...props);
+
   controllerInstance.run(...props);
 }
 
 
 module.exports = {
   init,
-  run,
+  processMessage,
 };

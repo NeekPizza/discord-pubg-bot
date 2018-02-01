@@ -18,7 +18,10 @@ class ExampleController extends BaseContentController {
     return `This is not an example of the framework :(`;
   }
 
-  getSuccessAction() {}
+  onMessageMatch() {
+    console.log('Message matched example');
+    this.messageChannel('hello this is a test of the channel messaging');
+  }
 }
 
 module.exports = ExampleController;
